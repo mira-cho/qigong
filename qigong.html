@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>The Thread — A Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1710;
+    --ink-mid: #4a4638;
+    --ink-light: #8a8070;
+    --ink-faint: #c8bfaa;
+    --paper: #f5f0e8;
+    --paper-dark: #ede6d6;
+    --paper-darker: #e0d8c4;
+    --accent: #5c6b3a;
+    --accent-light: #8a9e5a;
+    --accent-faint: #d4dcc0;
+    --warm: #8b4a2a;
+    --warm-faint: #e8d4c4;
+    --gold: #a07830;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html { height: 100%; }
+
+  body {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100%;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Subtle paper texture via repeating gradient */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 40px,
+        rgba(160,140,100,0.025) 40px,
+        rgba(160,140,100,0.025) 41px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 30px,
+        rgba(160,140,100,0.025) 30px,
+        rgba(160,140,100,0.025) 31px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .site { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .site-header {
+    padding: calc(var(--safe-top) + 32px) 24px 20px;
+    border-bottom: 1px solid var(--ink-faint);
+  }
+
+  .site-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  .site-title em {
+    font-style: italic;
+    color: var(--ink-mid);
+  }
+
+  .site-subtitle {
+    font-size: 13px;
+    color: var(--ink-light);
+    margin-top: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .site-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ink-light);
+    font-style: italic;
+  }
+
+  .site-time::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--ink-faint);
+  }
+
+  /* ── Phase nav ── */
+  .phase-nav {
+    display: flex;
+    border-bottom: 1px solid var(--ink-faint);
+    background: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .phase-btn {
+    flex: 1;
+    padding: 12px 6px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: var(--ink-light);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .phase-btn.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── Phase intro ── */
+  .phase-intro {
+    padding: 24px 24px 0;
+  }
+
+  .phase-name {
+    font-family: 'IM Fell English', serif;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+
+  .phase-desc {
+    margin-top: 8px;
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    font-style: italic;
+  }
+
+  .phase-dao {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: var(--paper-dark);
+    border-left: 2px solid var(--accent);
+    font-size: 13px;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+
+  /* ── Steps ── */
+  .steps { padding: 16px 24px 40px; }
+
+  .step {
+    border-bottom: 1px solid var(--paper-darker);
+    padding: 18px 0;
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-trigger {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .step-num {
+    font-family: 'IM Fell English', serif;
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-top: 4px;
+    min-width: 18px;
+    letter-spacing: 0.05em;
+  }
+
+  .step-head { flex: 1; }
+
+  .step-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .step-chinese {
+    font-size: 12px;
+    color: var(--ink-light);
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+  }
+
+  .step-sub {
+    font-size: 14px;
+    color: var(--ink-mid);
+    margin-top: 4px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .step-chevron {
+    font-size: 18px;
+    color: var(--ink-faint);
+    margin-top: 4px;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .step.open .step-chevron { transform: rotate(180deg); }
+
+  /* ── Step detail ── */
+  .step-detail {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease;
+  }
+
+  .step.open .step-detail { max-height: 2000px; }
+
+  .step-inner {
+    padding: 16px 0 4px 32px;
+  }
+
+  .detail-section {
+    margin-bottom: 16px;
+  }
+
+  .detail-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-light);
+    margin-bottom: 5px;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .detail-text {
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.75;
+  }
+
+  .thread-block {
+    background: var(--paper-dark);
+    border-left: 2px solid var(--accent-light);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+
+  .thread-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 5px;
+  }
+
+  .thread-text {
+    font-size: 14px;
+    color: var(--ink-mid);
+    line-height: 1.75;
+    font-style: italic;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .meta-tag {
+    font-size: 11px;
+    color: var(--ink-light);
+    background: var(--paper-darker);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    font-style: italic;
+  }
+
+  /* ── Footer ── */
+  .site-footer {
+    padding: 20px 24px calc(var(--safe-bottom) + 24px);
+    border-top: 1px solid var(--ink-faint);
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-style: italic;
+    line-height: 1.8;
+  }
+
+  /* ── Phase visibility ── */
+  .phase-content { display: none; }
+  .phase-content.active { display: block; }
+
+  /* ── Separator ornament ── */
+  .ornament {
+    text-align: center;
+    color: var(--ink-faint);
+    font-size: 16px;
+    letter-spacing: 0.3em;
+    margin: 0 0 4px;
+    font-family: 'IM Fell English', serif;
+  }
+</style>
+</head>
+<body>
+
+<div class="site">
+
+  <header class="site-header">
+    <div class="site-title">The Thread — <em>A Practice</em></div>
+    <div class="site-subtitle">Qigong after Master Zhongxian Wu</div>
+    <div class="site-time">35–45 minutes · practice outdoors when possible</div>
+  </header>
+
+  <nav class="phase-nav">
+    <button class="phase-btn active" onclick="switchPhase(0)">Arriving</button>
+    <button class="phase-btn" onclick="switchPhase(1)">Moving</button>
+    <button class="phase-btn" onclick="switchPhase(2)">Closing</button>
+  </nav>
+
+  <!-- PHASE 0: ARRIVING -->
+  <div class="phase-content active" id="phase-0">
+    <div class="phase-intro">
+      <div class="phase-name">Arriving —<br><em>noticing you are already here</em></div>
+      <p class="phase-desc">Before any movement: the practice is to stop performing and actually land in the body, in this place, in this moment.</p>
+      <div class="phase-dao">Ziran 自然 — self-so-ness. The wood grain is already there. You are learning to see it.</div>
+    </div>
+
+    <div class="steps">
+
+      <div class="step" id="s0-0">
+        <button class="step-trigger" onclick="toggleStep('s0-0')">
+          <span class="step-num">i</span>
+          <div class="step-head">
+            <div class="step-title">Wuji standing</div>
+            <div class="step-chinese">無極 Wújí</div>
+            <div class="step-sub">Stand in the state before doing</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">Feet shoulder-width apart, knees softly unlocked. Imagine a golden thread lifting from the crown of the head. Let everything that isn't needed drop away — jaw, shoulders, belly. Eyes half-closed, gaze soft and low. Simply be here, doing nothing at all.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">Wuji is the primordial state before Yin and Yang divide. Master Wu teaches that by returning to Wuji, we reconnect with our original nature — the self before habit, ambition, and thought.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">This is the same quality as pausing before picking up a chisel. Or the breath before a brush touches paper. Or the moment in yoga before you adjust anything. The practice is learning to carry this quality of arrival into everything else.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">3–5 min</span>
+              <span class="meta-tag">natural breath, unmanaged</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" id="s0-1">
+        <button class="step-trigger" onclick="toggleStep('s0-1')">
+          <span class="step-num">ii</span>
+          <div class="step-head">
+            <div class="step-title">Dou — whole-body shaking</div>
+            <div class="step-chinese">抖 Dǒu</div>
+            <div class="step-sub">Shake loose what the day has already layered on you</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">Let the shaking begin at the knees and rise without direction through hips, belly, spine, arms, jaw. Low effort, total permission. Like a dog emerging from water. Let sound come if it wants to.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">Rooted in shamanic practice, Dou awakens energy and consciousness in the body, opening the energy gates and meridians. It breaks up the body's accumulated holding — the tension that arrived before you noticed it.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">Notice what the shaking dislodges. The tension you didn't know you were carrying. The Qigong master, the wood carver finding the grain, and the yogi finding ease in a pose — all are doing the same thing: releasing the unnecessary so the natural can move.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">2–3 min</span>
+              <span class="meta-tag">natural, let movement disrupt it</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PHASE 1: MOVING -->
+  <div class="phase-content" id="phase-1">
+    <div class="phase-intro">
+      <div class="phase-name">Moving —<br><em>following rather than forcing</em></div>
+      <p class="phase-desc">The movements are slow enough that you can notice where you are pushing instead of following. That noticing is the practice.</p>
+      <div class="phase-dao">Wu Wei 無為 — effortless action. The Zhuangzi's cook never dulls his blade because he follows what is already open.</div>
+    </div>
+
+    <div class="steps">
+
+      <div class="step" id="s1-0">
+        <button class="step-trigger" onclick="toggleStep('s1-0')">
+          <span class="step-num">i</span>
+          <div class="step-head">
+            <div class="step-title">Lift heaven, press earth</div>
+            <div class="step-chinese">撐天按地 Chēng tiān àn dì</div>
+            <div class="step-sub">Become the axis between ground and sky</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">From Wuji, inhale as both palms float upward — leading with the thumbnails — arms rising overhead, fingers pointing to sky. Rise slightly onto the balls of the feet. Exhale, arms lower, palms press gently toward earth, heels return. 9 rounds, very slowly.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">Opens the central channel (Chong Mai) and harmonizes all three Dantians. A direct embodiment of the Daoist cosmological axis: heaven above, earth below, human being as the living bridge.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">When you are outside: you are not imitating this — you actually are it. The sky is above you. The ground is beneath your feet. The practice is just making that real, instead of theoretical. The same truth lives in a tree growing, in a lathe spiral going up and up.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">5 min</span>
+              <span class="meta-tag">inhale rising · exhale lowering</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" id="s1-1">
+        <button class="step-trigger" onclick="toggleStep('s1-1')">
+          <span class="step-num">ii</span>
+          <div class="step-head">
+            <div class="step-title">Cosmic orbit breathing</div>
+            <div class="step-chinese">周天功 Zhōu tiān gōng</div>
+            <div class="step-sub">Follow the circuit that is already running</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">Stand or sit. Place the tongue lightly on the roof of the mouth behind the teeth — this connects the two main channels. Inhale, awareness up the spine from the base to the crown. Exhale, awareness flows down the front midline — throat, heart, belly, back to the base. Don't force the sensation. Follow what is already there.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">The Cosmic Orbit circulates Qi through the Governing and Conception Vessels — the body's two primary meridians. The tongue-to-palate connection (the magpie bridge) completes the circuit. Foundation of Daoist inner alchemy.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">The grain in wood spirals through the whole tree. The breath in the body has its own circuit. Yoga asana at its best is the same: finding the body's natural pathway rather than imposing a shape onto it. These are all the same teaching in different materials.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">5–7 min</span>
+              <span class="meta-tag">inhale up the back · exhale down the front</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" id="s1-2">
+        <button class="step-trigger" onclick="toggleStep('s1-2')">
+          <span class="step-num">iii</span>
+          <div class="step-head">
+            <div class="step-title">Tiger gathers the Qi</div>
+            <div class="step-chinese">虎抱山 Hǔ bào shān</div>
+            <div class="step-sub">Open wide, then draw in — expansion and return</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">From Wuji, inhale as both arms open wide to the sides, palms forward — expansive, unhurried. Feel the ribs and the space between them. Exhale as arms gather inward, hands resting just below the navel, palms toward the body. Imagine drawing luminous energy from the whole field around you into your center. 9 rounds.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">From Master Wu's Shamanic Tiger Qigong (Laohu Gong). Activates the extraordinary meridians and stores cultivated Qi in the lower Dantian. The tiger represents raw natural power that has been refined — not tamed, but integrated.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">The craftsperson's attention gathers like this: wide at first, reading the whole piece, then narrowing into the specific place where the chisel meets the grain. Yoga does the same in a wide opening pose before folding into stillness. The movement teaches the rhythm of encounter.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">5 min</span>
+              <span class="meta-tag">inhale opening · exhale gathering</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" id="s1-3">
+        <button class="step-trigger" onclick="toggleStep('s1-3')">
+          <span class="step-num">iv</span>
+          <div class="step-head">
+            <div class="step-title">Separate heaven and earth</div>
+            <div class="step-chinese">分天地 Fēn tiān dì</div>
+            <div class="step-sub">Hold both poles — without collapsing into either</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">One hand rises overhead, palm pressing skyward. The other sinks beside the hip, palm pressing toward earth. Feel the long, gentle traction through the body. Hold 3–5 breaths. Return to center and reverse. 9 rounds each side, slowly.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">Yin and Yang are not opposites in conflict — they are the dynamic tension that makes everything alive. This movement embodies that tension in the body: one hand ascends, one descends, and you are the living space between them.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">The green wood curl on the lathe — it spirals because of the tension between the spinning wood and the still edge of the tool. The curl is the meeting of opposite forces. This movement is training you to inhabit that kind of creative tension instead of resolving it too quickly.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">4–5 min</span>
+              <span class="meta-tag">inhale into the stretch · exhale softening</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PHASE 2: CLOSING -->
+  <div class="phase-content" id="phase-2">
+    <div class="phase-intro">
+      <div class="phase-name">Closing —<br><em>carrying it forward</em></div>
+      <p class="phase-desc">The closing is not putting down the practice. It is asking: where does this quality want to go next?</p>
+      <div class="phase-dao">Pu 樸 — the uncarved block. Not empty but full of all possible forms. You return to it so you can act from it.</div>
+    </div>
+
+    <div class="steps">
+
+      <div class="step" id="s2-0">
+        <button class="step-trigger" onclick="toggleStep('s2-0')">
+          <span class="step-num">i</span>
+          <div class="step-head">
+            <div class="step-title">Sealing the Dantian</div>
+            <div class="step-chinese">收丹田 Shōu dān tián</div>
+            <div class="step-sub">Store what was gathered before it disperses</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">Both hands rest over the lower Dantian — right hand on skin, left over right (reverse for women). Circle the hands slowly: 9 times clockwise, gathering inward. Then 9 times counter-clockwise, releasing any excess. Gradually reduce the circles until the hands are still. 3 long, quiet breaths.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">Without this sealing, the Qi raised during practice disperses. The closing consolidates the practice into the body rather than leaving it suspended in the air.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">A carving session or a yoga practice also needs a close. Not cleaning up the shavings — but the internal moment of setting down the tool with intention, rather than just stopping. The practice is complete. You are changed by it.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">3 min</span>
+              <span class="meta-tag">natural, quieting</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" id="s2-1">
+        <button class="step-trigger" onclick="toggleStep('s2-1')">
+          <span class="step-num">ii</span>
+          <div class="step-head">
+            <div class="step-title">Three purifying sounds</div>
+            <div class="step-chinese">三聲 Sān shēng</div>
+            <div class="step-sub">Clear what remains through resonance</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">Inhale slowly. On a long exhale: open the mouth and release a soft, low HAAAA from the chest — without performance, just release. Repeat 3 times. Then: a humming MMMM that vibrates the skull, 3 times. Finally: a silent, slow exhale through slightly parted lips, as though cooling something.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">Sound (Jue 訣) is one of the three essential practices of Master Wu's shamanic tradition alongside mudras and talismans. Healing sounds clear stuck Qi from the organ systems. The HAAAA releases the heart and lungs. The hum resonates the upper spirit gates.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">The moment when a piece of green wood splits cleanly along the grain — there is often a sound. Can you receive it the way you receive the HAAAA? Not as a performance, not as an outcome, but as an event that simply happened because the conditions were right.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">2–3 min</span>
+              <span class="meta-tag">long exhales, sound as vehicle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" id="s2-2">
+        <button class="step-trigger" onclick="toggleStep('s2-2')">
+          <span class="step-num">iii</span>
+          <div class="step-head">
+            <div class="step-title">The question of transition</div>
+            <div class="step-chinese">過渡 Guòdù</div>
+            <div class="step-sub">Before you move, ask: where does this want to go?</div>
+          </div>
+          <span class="step-chevron">⌄</span>
+        </button>
+        <div class="step-detail">
+          <div class="step-inner">
+            <div class="detail-section">
+              <div class="detail-label">How</div>
+              <div class="detail-text">Return to Wuji standing. Don't immediately plan what comes next. Feel the quality present in the body right now — alive, quiet, here. Inwardly ask without urgency: is there a craft waiting? A yoga mat? A walk? A conversation? Let the answer come from the body rather than the schedule. Bow gently toward the ground and sky before moving.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Why</div>
+              <div class="detail-text">This is the core transfer. The Qigong practice has no value if it stays quarantined in practice time. The closing invites the quality cultivated — presence, naturalness, following rather than forcing — to migrate into whatever comes next.</div>
+            </div>
+            <div class="thread-block">
+              <div class="thread-label">The thread</div>
+              <div class="thread-text">This is where the tool acquisition disappears and the spoon wall disappears. You are not asking "what should I do" — you are noticing what wants to happen through you, the way a river doesn't decide to flow downhill. That noticing, right now, is the Dao at work.</div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">2–3 min</span>
+              <span class="meta-tag">natural, unhurried</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="ornament">· · ·</div>
+    After Zhongxian Wu &amp; the Daoist lineage<br>
+    <em>The way that can be named is not the eternal way</em>
+  </footer>
+
+</div>
+
+<script>
+  function switchPhase(idx) {
+    document.querySelectorAll('.phase-btn').forEach((b, i) => {
+      b.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.phase-content').forEach((c, i) => {
+      c.classList.toggle('active', i === idx);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleStep(id) {
+    const el = document.getElementById(id);
+    const isOpen = el.classList.contains('open');
+    // close all in same phase
+    el.closest('.steps').querySelectorAll('.step').forEach(s => s.classList.remove('open'));
+    if (!isOpen) el.classList.add('open');
+  }
+</script>
+
+</body>
+</html>
